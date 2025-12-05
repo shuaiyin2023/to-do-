@@ -44,44 +44,25 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
-        },
-        {
-          "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": ["x64"]
         }
-      ],
-      "icon": "assets/icon.icns",
-      "hardenedRuntime": true,
-      "entitlements": "assets/entitlements.mac.plist",
-      "entitlementsInherit": "assets/entitlements.mac.plist"
+      ]
     },
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
-        },
-        {
-          "target": "portable",
-          "arch": ["x64", "ia32"]
+          "arch": ["x64"]
         }
-      ],
-      "icon": "assets/icon.ico",
-      "publisherName": "Desktop Todo"
+      ]
     },
     "linux": {
       "target": [
         {
           "target": "AppImage",
           "arch": ["x64"]
-        },
-        {
-          "target": "deb",
-          "arch": ["x64"]
         }
       ],
-      "icon": "assets/icon.png",
       "category": "Office"
     },
     "nsis": {
@@ -92,21 +73,7 @@
       "shortcutName": "桌面待办"
     },
     "dmg": {
-      "title": "桌面待办",
-      "icon": "assets/icon.icns",
-      "background": "assets/dmg-background.png",
-      "contents": [
-        {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "x": 410,
-          "y": 220,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
+      "title": "桌面待办"
     }
   }
 }
