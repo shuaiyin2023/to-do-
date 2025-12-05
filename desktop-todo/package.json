@@ -1,0 +1,13 @@
+{
+  "name": "desktop-todo",
+  "version": "1.0.0",
+  "description": "Desktop Todo App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
