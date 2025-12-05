@@ -787,7 +787,8 @@
                 } else if (this.currentFilter === 'pending') {
                     return this.tasks.filter(task => task.status === 'pending');
                 }
-                return this.tasks;
+                // 默认情况下，不显示已删除的任务
+                return this.tasks.filter(task => task.status !== 'deleted');
             }
 
             renderTasks() {
