@@ -12,169 +12,288 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: #ffffff;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: rgba(0, 0, 0, 0.03);
+            color: #1d1d1f;
             user-select: none;
             overflow: hidden;
             width: 100%;
             height: 100vh;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .title-bar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 12px;
-            font-size: 14px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1d1d1f;
+            padding: 10px 16px;
+            font-size: 13px;
             font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
             -webkit-app-region: drag;
             cursor: move;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .title-bar span {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         .title-bar .window-controls {
             -webkit-app-region: no-drag;
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
 
         .window-controls button {
-            background: rgba(255,255,255,0.2);
+            background: rgba(0, 0, 0, 0.06);
             border: none;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 3px;
+            color: #1d1d1f;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 12px;
-            transition: background 0.2s;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .window-controls button:hover {
-            background: rgba(255,255,255,0.3);
+            background: rgba(0, 0, 0, 0.12);
+            transform: scale(1.05);
+        }
+
+        .window-controls button:active {
+            transform: scale(0.95);
         }
 
         .container {
-            padding: 12px;
-            height: calc(100vh - 40px);
+            padding: 16px;
+            height: calc(100vh - 51px);
             overflow-y: auto;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .stats {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1d1d1f;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            font-size: 11px;
+            font-weight: 500;
             display: flex;
             justify-content: space-between;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .stats span {
             text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .stats span:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.08);
         }
 
         .stats strong {
             display: block;
-            font-size: 16px;
-            margin-bottom: 2px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1d1d1f;
+            letter-spacing: -0.02em;
         }
 
         .add-btn {
             width: 100%;
-            padding: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 14px;
-            margin-bottom: 12px;
+            font-size: 15px;
             font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25);
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .add-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.35);
+            background: linear-gradient(135deg, #0056CC 0%, #4640B8 100%);
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
         }
 
         .input-section {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             display: none;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .input-section input {
             width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 13px;
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 400;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+            color: #1d1d1f;
+            letter-spacing: -0.01em;
         }
 
         .input-section input:focus {
-            border-color: #667eea;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .input-section input::placeholder {
+            color: #8e8e93;
         }
 
         .filter-buttons {
             display: flex;
-            gap: 6px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .filter-btn {
-            padding: 4px 8px;
-            background: #f0f0f0;
+            flex: 1;
+            padding: 8px 16px;
+            background: transparent;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #8e8e93;
             outline: none;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            text-align: center;
+            letter-spacing: -0.01em;
+        }
+
+        .filter-btn:hover {
+            color: #007AFF;
+            background: rgba(0, 122, 255, 0.08);
         }
 
         .filter-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: rgba(0, 122, 255, 0.12);
+            color: #007AFF;
+            font-weight: 600;
         }
 
         .task-item {
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
             display: flex;
             align-items: flex-start;
-            gap: 10px;
-            transition: all 0.2s ease;
+            gap: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         .task-item:hover {
-            border-color: #667eea;
-            box-shadow: 0 3px 8px rgba(102,126,234,0.2);
-            transform: translateY(-1px);
+            border-color: rgba(0, 122, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 1);
         }
 
         .task-item.completed {
-            background: #f8f9fa;
+            background: rgba(242, 242, 247, 0.8);
             opacity: 0.7;
         }
 
+        .task-item.completed:hover {
+            background: rgba(242, 242, 247, 1);
+        }
+
         .task-checkbox {
-            margin-top: 2px;
+            margin-top: 3px;
             cursor: pointer;
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            appearance: none;
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .task-checkbox:checked {
+            background: #007AFF;
+            border-color: #007AFF;
+        }
+
+        .task-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .task-checkbox:hover {
+            border-color: #007AFF;
         }
 
         .task-content {
@@ -183,75 +302,83 @@
         }
 
         .task-title {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             word-break: break-word;
-            line-height: 1.3;
+            line-height: 1.4;
+            color: #1d1d1f;
+            letter-spacing: -0.01em;
         }
 
         .task-item.completed .task-title {
             text-decoration: line-through;
-            opacity: 0.6;
+            opacity: 0.5;
+            color: #8e8e93;
         }
 
         .task-time {
-            font-size: 11px;
-            color: #999;
-            margin-bottom: 2px;
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 4px;
+            font-weight: 400;
         }
 
         .task-detailed-time {
-            font-size: 10px;
-            color: #666;
-            background: #f5f5f5;
-            padding: 1px 4px;
-            border-radius: 2px;
+            font-size: 11px;
+            color: #8e8e93;
+            background: rgba(142, 142, 147, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
             display: inline-block;
-            margin-top: 1px;
+            margin-top: 4px;
+            font-weight: 400;
         }
 
         .task-due-date {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 3px;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 8px;
             display: inline-block;
-            margin-top: 2px;
+            margin-top: 6px;
             font-weight: 500;
             white-space: nowrap;
             max-width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
+            letter-spacing: -0.01em;
         }
 
         .task-due-date.overdue {
-            background: #ffebee;
-            color: #c62828;
-            border: 1px solid #ef9a9a;
+            background: rgba(255, 59, 48, 0.1);
+            color: #FF3B30;
+            border: 1px solid rgba(255, 59, 48, 0.2);
         }
 
         .task-due-date.upcoming {
-            background: #fff3e0;
-            color: #f57c00;
-            border: 1px solid #ffcc02;
+            background: rgba(255, 149, 0, 0.1);
+            color: #FF9500;
+            border: 1px solid rgba(255, 149, 0, 0.2);
         }
 
         .task-due-date.normal {
-            background: #e8f5e8;
-            color: #2e7d32;
-            border: 1px solid #81c784;
+            background: rgba(52, 199, 89, 0.1);
+            color: #34C759;
+            border: 1px solid rgba(52, 199, 89, 0.2);
         }
 
         .delete-btn {
-            background: #ff4757;
-            color: white;
+            background: rgba(255, 59, 48, 0.1);
+            color: #FF3B30;
             border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 10px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 11px;
+            font-weight: 500;
             display: none;
-            transition: background 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            letter-spacing: -0.01em;
         }
 
         .task-item:hover .delete-btn {
@@ -259,14 +386,16 @@
         }
 
         .delete-btn:hover {
-            background: #ff3838;
+            background: rgba(255, 59, 48, 0.8);
+            color: white;
+            transform: scale(1.05);
         }
 
         .empty-state {
             text-align: center;
-            padding: 40px 15px;
-            color: #999;
-            font-size: 13px;
+            padding: 60px 20px;
+            color: #8e8e93;
+            font-size: 14px;
         }
 
         .empty-state p {
@@ -274,34 +403,42 @@
         }
 
         .empty-state p:first-child {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
-            color: #666;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .empty-state p:last-child {
+            font-size: 13px;
+            color: #8e8e93;
+            font-weight: 400;
         }
 
         /* 滚动条样式 */
         ::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: transparent;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+            background: rgba(0, 0, 0, 0.3);
         }
 
         /* 动画 */
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(-20px);
             }
             to {
                 opacity: 1;
@@ -310,20 +447,25 @@
         }
 
         .task-item {
-            animation: slideIn 0.3s ease-out;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         /* 状态指示器 */
         .status-indicator {
             position: fixed;
-            bottom: 10px;
-            left: 10px;
-            background: #667eea;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 122, 255, 0.9);
             color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
             display: none;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+            letter-spacing: -0.01em;
         }
     </style>
 </head>
@@ -362,15 +504,15 @@
 
         <div id="add-task-section" class="input-section">
             <input type="text" id="task-input" placeholder="输入任务内容，按回车确认..." />
-            <div style="margin-top: 8px;">
-                <input type="datetime-local" id="due-date-input" style="width: 100%; padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'" />
-                <div style="font-size: 11px; color: #666; margin-top: 4px; text-align: left;">
+            <div style="margin-top: 12px;">
+                <input type="datetime-local" id="due-date-input" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 12px; font-size: 15px; font-weight: 400; outline: none; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); background: rgba(255, 255, 255, 0.8); color: #1d1d1f; letter-spacing: -0.01em;" onfocus="this.style.borderColor='#007AFF'; this.style.boxShadow='0 0 0 4px rgba(0, 122, 255, 0.1)'; this.style.background='rgba(255, 255, 255, 1)'" onblur="this.style.borderColor='rgba(0, 0, 0, 0.1)'; this.style.boxShadow='none'; this.style.background='rgba(255, 255, 255, 0.8)'" />
+                <div style="font-size: 12px; color: #8e8e93; margin-top: 6px; text-align: left; font-weight: 400;">
                     📅 截止时间（可选）- 设置任务的完成期限
                 </div>
             </div>
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button onclick="addTaskWithDueDate()" style="flex: 1; padding: 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">添加任务</button>
-                <button onclick="hideAddTask()" style="padding: 8px 12px; background: #ccc; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">取消</button>
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button onclick="addTaskWithDueDate()" style="flex: 1; padding: 12px 20px; background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3); letter-spacing: -0.01em;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 16px rgba(0, 122, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 122, 255, 0.3)'">添加任务</button>
+                <button onclick="hideAddTask()" style="padding: 12px 20px; background: rgba(142, 142, 147, 0.12); color: #8e8e93; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); letter-spacing: -0.01em;" onmouseover="this.style.background='rgba(142, 142, 147, 0.2)'; this.style.color='#1d1d1f'" onmouseout="this.style.background='rgba(142, 142, 147, 0.12)'; this.style.color='#8e8e93'">取消</button>
             </div>
         </div>
 
