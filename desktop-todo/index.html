@@ -331,8 +331,15 @@
             padding: 2px 8px;
             border-radius: 6px;
             display: inline-block;
-            margin-top: 4px;
             font-weight: 400;
+        }
+
+        .task-time-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            gap: 8px;
         }
 
         .task-due-date {
@@ -340,13 +347,13 @@
             padding: 4px 8px;
             border-radius: 8px;
             display: inline-block;
-            margin-top: 6px;
             font-weight: 500;
             white-space: nowrap;
-            max-width: 100%;
+            max-width: 50%;
             overflow: hidden;
             text-overflow: ellipsis;
             letter-spacing: -0.01em;
+            flex-shrink: 0;
         }
 
         .task-due-date.overdue {
@@ -816,9 +823,10 @@
                         />
                         <div class="task-content">
                             <div class="task-title">${this.escapeHtml(task.title)}</div>
-                            <div class="task-time">${this.formatTime(task.created_at)}</div>
-                            <div class="task-detailed-time">${this.formatDetailedTime(task.created_at).replace(/<[^>]*>/g, '').replace('📅 ', '')}</div>
-                            ${task.due_date ? this.formatDueDate(task.due_date) : ''}
+                            <div class="task-time-row">
+                                <div class="task-detailed-time">${this.formatDetailedTime(task.created_at).replace(/<[^>]*>/g, '').replace('📅 ', '')}</div>
+                                ${task.due_date ? this.formatDueDate(task.due_date) : ''}
+                            </div>
                         </div>
                         <button class="delete-btn" onclick="event.stopPropagation(); todoManager.deleteTask('${task.id}')">删除</button>
                     </div>
@@ -866,7 +874,7 @@
                     });
                 }
 
-                return `<div class="task-detailed-time">📅 ${timeText}</div>`;
+                return `<div class="task-detailed-time">创建：${timeText}</div>`;
             }
 
             formatDueDate(dueDate) {
@@ -885,39 +893,42 @@
                     const overdueDays = Math.abs(days);
                     const overdueHours = Math.abs(hours);
                     if (overdueDays > 0) {
-                        timeText = `已逾期 ${overdueDays}天`;
+                        timeText = `截止：已逾期 ${overdueDays}天`;
                     } else if (overdueHours > 0) {
-                        timeText = `已逾期 ${overdueHours}小时`;
+                        timeText = `截止：已逾期 ${overdueHours}小时`;
                     } else {
-                        timeText = '已逾期';
+                        timeText = '截止：已逾期';
                     }
                 } else if (days < 1) {
                     cssClass = 'upcoming';
                     if (hours > 0) {
-                        timeText = `还有 ${hours}小时到期`;
+                        timeText = `截止：还有 ${hours}小时`;
                     } else {
-                        timeText = '即将到期';
+                        timeText = '截止：即将到期';
                     }
                 } else if (days < 7) {
                     cssClass = 'normal';
-                    timeText = `还有 ${days}天到期`;
+                    timeText = `截止：还有 ${days}天`;
                 } else {
                     cssClass = 'normal';
-                    timeText = due.toLocaleDateString('zh-CN', {
+                    const formattedDate = due.toLocaleDateString('zh-CN', {
                         month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
                     });
+                    timeText = `截止：${formattedDate}`;
                 }
 
                 return `<div class="task-due-date ${cssClass}">${timeText}</div>`;
             }
 
             updateStats() {
-                const total = this.tasks.length;
-                const completed = this.tasks.filter(task => task.status === 'completed').length;
-                const pending = this.tasks.filter(task => task.status === 'pending').length;
+                // 只统计活跃任务（不包括已删除的任务）
+                const activeTasks = this.tasks.filter(task => task.status !== 'deleted');
+                const total = activeTasks.length;
+                const completed = activeTasks.filter(task => task.status === 'completed').length;
+                const pending = activeTasks.filter(task => task.status === 'pending').length;
 
                 document.getElementById('total-count').textContent = total;
                 document.getElementById('completed-count').textContent = completed;
