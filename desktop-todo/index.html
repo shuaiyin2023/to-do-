@@ -473,8 +473,9 @@
     <div class="title-bar">
         <span>📝 桌面待办</span>
         <div class="window-controls">
-            <button onclick="minimizeWindow()">－</button>
-            <button onclick="toggleOpacity()">◐</button>
+            <button onclick="minimizeWindow()" title="最小化">－</button>
+            <button onclick="toggleOpacity()" title="切换透明度">◐</button>
+            <button onclick="manualCleanup()" title="清理旧任务" style="color: #FF9500;">🧹</button>
         </div>
     </div>
 
@@ -543,6 +544,7 @@
                 this.tasks = this.loadTasks();
                 this.currentFilter = 'all';
                 this.init();
+                this.cleanupOldTasks(); // 启动时清理旧数据
                 showStatus('应用启动成功');
             }
 
@@ -567,6 +569,11 @@
                 document.addEventListener('dragover', (e) => e.preventDefault());
                 document.addEventListener('drop', (e) => e.preventDefault());
 
+                // 定期清理（每30分钟检查一次）
+                setInterval(() => {
+                    this.cleanupOldTasks();
+                }, 30 * 60 * 1000);
+
                 showStatus('初始化完成');
             }
 
@@ -588,6 +595,68 @@
                     console.log('保存数据成功');
                 } catch (error) {
                     console.error('保存数据失败:', error);
+                }
+            }
+
+            cleanupOldTasks() {
+                const now = new Date();
+                const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                const initialCount = this.tasks.length;
+                let completedDeletedCount = 0;
+                let deletedTaskCount = 0;
+
+                // 删除超过1天的已完成任务和已删除任务
+                const tasksAfterCleanup = this.tasks.filter(task => {
+                    // 保留所有待办任务
+                    if (task.status === 'pending') {
+                        return true;
+                    }
+
+                    // 对于已完成任务，检查完成时间
+                    if (task.status === 'completed' && task.completed_at) {
+                        const completedTime = new Date(task.completed_at);
+                        // 如果完成时间超过1天，则删除
+                        if (completedTime <= oneDayAgo) {
+                            completedDeletedCount++;
+                            return false;
+                        }
+                        return true;
+                    }
+
+                    // 对于已删除任务，检查删除时间
+                    if (task.status === 'deleted' && task.deleted_at) {
+                        const deletedTime = new Date(task.deleted_at);
+                        // 如果删除时间超过1天，则彻底删除
+                        if (deletedTime <= oneDayAgo) {
+                            deletedTaskCount++;
+                            return false;
+                        }
+                        return false; // 不显示在界面中，但保留数据
+                    }
+
+                    // 保留没有完成时间记录的任务（可能是旧数据）
+                    return true;
+                });
+
+                // 如果有任务被删除，更新数据
+                if (tasksAfterCleanup.length < initialCount) {
+                    this.tasks = tasksAfterCleanup;
+                    this.saveTasks();
+
+                    const totalDeleted = completedDeletedCount + deletedTaskCount;
+                    if (totalDeleted > 0) {
+                        let message = `🧹 自动清理了 ${totalDeleted} 个旧任务`;
+                        if (completedDeletedCount > 0 && deletedTaskCount > 0) {
+                            message += `（${completedDeletedCount} 个已完成，${deletedTaskCount} 个已删除）`;
+                        } else if (deletedTaskCount > 0) {
+                            message += `（${deletedTaskCount} 个已删除）`;
+                        } else if (completedDeletedCount > 0) {
+                            message += `（${completedDeletedCount} 个已完成）`;
+                        }
+
+                        console.log(`清理统计: ${completedDeletedCount} 个已完成任务，${deletedTaskCount} 个已删除任务`);
+                        showStatus(message);
+                    }
                 }
             }
 
@@ -665,11 +734,17 @@
 
             deleteTask(id) {
                 if (confirm('确定要删除这个任务吗？')) {
-                    this.tasks = this.tasks.filter(task => task.id !== id);
-                    this.saveTasks();
-                    this.renderTasks();
-                    this.updateStats();
-                    showStatus('🗑️ 任务已删除');
+                    const task = this.tasks.find(t => t.id === id);
+                    if (task) {
+                        // 软删除：标记为已删除并记录删除时间
+                        task.status = 'deleted';
+                        task.deleted_at = new Date().toISOString();
+
+                        this.saveTasks();
+                        this.renderTasks();
+                        this.updateStats();
+                        showStatus('🗑️ 任务已移至回收站（24小时后自动清理）');
+                    }
                 }
             }
 
@@ -943,6 +1018,18 @@
             console.log('addTaskWithDueDate被调用');
             if (todoManager) {
                 todoManager.addTaskWithDueDate();
+            }
+        }
+
+        function manualCleanup() {
+            console.log('manualCleanup被调用');
+            if (todoManager) {
+                if (confirm('确定要清理超过1天的已完成任务和已删除任务吗？')) {
+                    todoManager.cleanupOldTasks();
+                    todoManager.renderTasks();
+                    todoManager.updateStats();
+                    showStatus('✨ 手动清理完成');
+                }
             }
         }
 
