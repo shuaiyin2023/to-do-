@@ -76,6 +76,86 @@
             transform: scale(0.95);
         }
 
+        .window-level-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .window-level-menu {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            min-width: 200px;
+            padding: 8px;
+            overflow: hidden;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+        }
+
+        .window-level-menu.show {
+            display: block;
+            animation: fadeInDown 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+            font-size: 12px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 2px;
+        }
+
+        .menu-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .menu-item:hover {
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+        }
+
+        .menu-item.active {
+            background: rgba(0, 122, 255, 0.12);
+            color: #007AFF;
+            font-weight: 600;
+        }
+
+        .menu-icon {
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .menu-text {
+            flex: 1;
+            font-size: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .container {
             padding: 16px;
             height: calc(100vh - 51px);
@@ -482,6 +562,23 @@
         <div class="window-controls">
             <button onclick="minimizeWindow()" title="最小化">－</button>
             <button onclick="toggleOpacity()" title="切换透明度">◐</button>
+            <div class="window-level-dropdown">
+                <button onclick="toggleWindowLevelDropdown()" title="窗口层级" id="window-level-btn" style="color: #007AFF;">⬆️</button>
+                <div id="window-level-menu" class="window-level-menu">
+                    <div onclick="setWindowLevel('alwaysOnTop')" class="menu-item active" data-level="alwaysOnTop">
+                        <span class="menu-icon">🔝</span>
+                        <span class="menu-text">始终浮于最上层</span>
+                    </div>
+                    <div onclick="setWindowLevel('desktop')" class="menu-item" data-level="desktop">
+                        <span class="menu-icon">🖥️</span>
+                        <span class="menu-text">只浮于桌面</span>
+                    </div>
+                    <div onclick="setWindowLevel('normal')" class="menu-item" data-level="normal">
+                        <span class="menu-icon">📋</span>
+                        <span class="menu-text">普通窗口</span>
+                    </div>
+                </div>
+            </div>
             <button onclick="manualCleanup()" title="清理旧任务" style="color: #FF9500;">🧹</button>
         </div>
     </div>
@@ -580,6 +677,11 @@
                 setInterval(() => {
                     this.cleanupOldTasks();
                 }, 30 * 60 * 1000);
+
+                // 定期刷新界面（每分钟更新一次截止时间显示）
+                setInterval(() => {
+                    this.renderTasks();
+                }, 60 * 1000);
 
                 showStatus('初始化完成');
             }
@@ -1045,10 +1147,128 @@
             }
         }
 
+        // 窗口层级下拉菜单控制
+        function toggleWindowLevelDropdown() {
+            const menu = document.getElementById('window-level-menu');
+            if (menu) {
+                const isShowing = menu.classList.contains('show');
+
+                if (!isShowing) {
+                    menu.classList.add('show');
+
+                    // 点击其他地方关闭菜单
+                    setTimeout(() => {
+                        document.addEventListener('click', closeWindowLevelDropdown);
+                    }, 100);
+                } else {
+                    menu.classList.remove('show');
+                    document.removeEventListener('click', closeWindowLevelDropdown);
+                }
+            }
+        }
+
+        function closeWindowLevelDropdown(event) {
+            const dropdown = document.querySelector('.window-level-dropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                const menu = document.getElementById('window-level-menu');
+                if (menu) {
+                    menu.classList.remove('show');
+                }
+                document.removeEventListener('click', closeWindowLevelDropdown);
+            }
+        }
+
+        // 设置窗口层级
+        function setWindowLevel(level) {
+            if (window.electronAPI) {
+                window.electronAPI.setWindowLevel(level);
+                updateWindowLevelMenu(level);
+
+                let statusText = '';
+                switch (level) {
+                    case 'alwaysOnTop':
+                        statusText = '窗口始终浮于最上层';
+                        break;
+                    case 'desktop':
+                        statusText = '窗口只浮于桌面';
+                        break;
+                    case 'normal':
+                        statusText = '窗口设为普通层级';
+                        break;
+                    default:
+                        statusText = '窗口层级已更改';
+                        break;
+                }
+                showStatus(statusText);
+
+                // 关闭菜单
+                const menu = document.getElementById('window-level-menu');
+                if (menu) {
+                    menu.classList.remove('show');
+                }
+            } else {
+                console.error('Electron API 不可用');
+                showStatus('API不可用');
+            }
+        }
+
+        // 更新窗口层级菜单显示
+        function updateWindowLevelMenu(level) {
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                const itemLevel = item.getAttribute('data-level');
+                if (itemLevel === level) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // 更新按钮图标
+            const button = document.getElementById('window-level-btn');
+            if (button) {
+                switch (level) {
+                    case 'alwaysOnTop':
+                        button.textContent = '🔝';
+                        button.title = '始终浮于最上层';
+                        button.style.color = '#007AFF';
+                        break;
+                    case 'desktop':
+                        button.textContent = '🖥️';
+                        button.title = '只浮于桌面';
+                        button.style.color = '#34C759';
+                        break;
+                    case 'normal':
+                        button.textContent = '📋';
+                        button.title = '普通窗口';
+                        button.style.color = '#8e8e93';
+                        break;
+                    default:
+                        button.textContent = '⬆️';
+                        button.title = '窗口层级';
+                        button.style.color = '#007AFF';
+                        break;
+                }
+            }
+        }
+
+        // 初始化窗口层级菜单状态
+        function initializeWindowLevelMenu() {
+            if (window.electronAPI) {
+                const level = window.electronAPI.getWindowLevel();
+                updateWindowLevelMenu(level);
+            }
+        }
+
         // 页面加载完成后测试
         window.addEventListener('load', () => {
             console.log('页面完全加载完成');
             showStatus('页面加载完成');
+
+            // 延迟初始化窗口层级菜单状态
+            setTimeout(() => {
+                initializeWindowLevelMenu();
+            }, 1500);
         });
     </script>
 </body>

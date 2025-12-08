@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 
 let mainWindow;
+let windowLevel = 'alwaysOnTop'; // 默认置顶
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -53,6 +54,14 @@ function createWindow() {
               toggleOpacity: () => {
                 console.log('调用切换透明度');
                 return ipcRenderer.invoke('toggle-opacity');
+              },
+              setWindowLevel: (level) => {
+                console.log('设置窗口层级:', level);
+                return ipcRenderer.invoke('set-window-level', level);
+              },
+              getWindowLevel: () => {
+                console.log('获取窗口层级');
+                return ipcRenderer.invoke('get-window-level');
               }
             };
 
@@ -106,6 +115,38 @@ ipcMain.handle('toggle-opacity', () => {
     mainWindow.setOpacity(newOpacity);
     return newOpacity;
   }
+});
+
+ipcMain.handle('set-window-level', (event, level) => {
+  if (mainWindow) {
+    windowLevel = level;
+
+    switch (level) {
+      case 'alwaysOnTop':
+        mainWindow.setAlwaysOnTop(true, 'screen-saver');
+        break;
+      case 'desktop':
+        // macOS 特有的桌面层级，其他系统使用 normal
+        if (process.platform === 'darwin') {
+          mainWindow.setAlwaysOnTop(true, 'desktop');
+        } else {
+          mainWindow.setAlwaysOnTop(false);
+        }
+        break;
+      case 'normal':
+        mainWindow.setAlwaysOnTop(false);
+        break;
+      default:
+        mainWindow.setAlwaysOnTop(true);
+        break;
+    }
+
+    return level;
+  }
+});
+
+ipcMain.handle('get-window-level', () => {
+  return windowLevel;
 });
 
 // 全局快捷键
