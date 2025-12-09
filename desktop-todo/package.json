@@ -37,9 +37,11 @@
     "files": [
       "main.js",
       "index.html",
-      "package.json"
+      "package.json",
+      "assets/**/*"
     ],
     "mac": {
+      "icon": "assets/icon.icns",
       "category": "public.app-category.productivity",
       "target": [
         {

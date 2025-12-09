@@ -83,20 +83,17 @@
 
         .window-level-menu {
             display: none;
-            position: absolute;
+            position: fixed;
             background: rgba(255, 255, 255, 0.98);
             border: 1px solid rgba(0, 0, 0, 0.15);
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            z-index: 1000;
+            z-index: 9999;
             min-width: 200px;
             padding: 8px;
             overflow: hidden;
-            right: 0;
-            top: 100%;
-            margin-top: 4px;
         }
 
         .window-level-menu.show {
@@ -562,23 +559,7 @@
         <div class="window-controls">
             <button onclick="minimizeWindow()" title="最小化">－</button>
             <button onclick="toggleOpacity()" title="切换透明度">◐</button>
-            <div class="window-level-dropdown">
-                <button onclick="toggleWindowLevelDropdown()" title="窗口层级" id="window-level-btn" style="color: #007AFF;">⬆️</button>
-                <div id="window-level-menu" class="window-level-menu">
-                    <div onclick="setWindowLevel('alwaysOnTop')" class="menu-item active" data-level="alwaysOnTop">
-                        <span class="menu-icon">🔝</span>
-                        <span class="menu-text">始终浮于最上层</span>
-                    </div>
-                    <div onclick="setWindowLevel('desktop')" class="menu-item" data-level="desktop">
-                        <span class="menu-icon">🖥️</span>
-                        <span class="menu-text">只浮于桌面</span>
-                    </div>
-                    <div onclick="setWindowLevel('normal')" class="menu-item" data-level="normal">
-                        <span class="menu-icon">📋</span>
-                        <span class="menu-text">普通窗口</span>
-                    </div>
-                </div>
-            </div>
+            <button onclick="toggleWindowLevelDropdown()" title="窗口层级" id="window-level-btn" style="color: #007AFF;">⬆️</button>
             <button onclick="manualCleanup()" title="清理旧任务" style="color: #FF9500;">🧹</button>
         </div>
     </div>
@@ -630,6 +611,22 @@
     </div>
 
     <div class="status-indicator" id="status-indicator"></div>
+
+    <!-- 窗口层级下拉菜单 -->
+    <div id="window-level-menu" class="window-level-menu">
+        <div onclick="setWindowLevel('alwaysOnTop')" class="menu-item active" data-level="alwaysOnTop">
+            <span class="menu-icon">🔝</span>
+            <span class="menu-text">始终浮于最上层</span>
+        </div>
+        <div onclick="setWindowLevel('desktop')" class="menu-item" data-level="desktop">
+            <span class="menu-icon">🖥️</span>
+            <span class="menu-text">只浮于桌面</span>
+        </div>
+        <div onclick="setWindowLevel('normal')" class="menu-item" data-level="normal">
+            <span class="menu-icon">📋</span>
+            <span class="menu-text">普通窗口</span>
+        </div>
+    </div>
 
     <script>
         // 状态指示器
@@ -1150,10 +1147,29 @@
         // 窗口层级下拉菜单控制
         function toggleWindowLevelDropdown() {
             const menu = document.getElementById('window-level-menu');
-            if (menu) {
+            const button = document.getElementById('window-level-btn');
+
+            if (menu && button) {
                 const isShowing = menu.classList.contains('show');
 
                 if (!isShowing) {
+                    // 计算菜单位置
+                    const buttonRect = button.getBoundingClientRect();
+                    const menuWidth = 200;
+                    const menuHeight = 150;
+
+                    // 设置菜单位置在按钮下方，右对齐
+                    let left = buttonRect.right - menuWidth;
+                    let top = buttonRect.bottom + 4;
+
+                    // 确保菜单不超出窗口边界
+                    if (left < 0) left = 4;
+                    if (top + menuHeight > window.innerHeight) {
+                        top = buttonRect.top - menuHeight - 4;
+                    }
+
+                    menu.style.left = left + 'px';
+                    menu.style.top = top + 'px';
                     menu.classList.add('show');
 
                     // 点击其他地方关闭菜单

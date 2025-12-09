@@ -5,6 +5,12 @@ let mainWindow;
 let windowLevel = 'alwaysOnTop'; // 默认置顶
 
 function createWindow() {
+  // 检查图标文件是否存在
+  const iconPath = '/Users/yinlusheng/Documents/MyProjects/to do工具/desktop-todo/assets/icon.icns';
+  const fs = require('fs');
+  console.log('图标文件路径:', iconPath);
+  console.log('图标文件是否存在:', fs.existsSync(iconPath));
+
   mainWindow = new BrowserWindow({
     width: 380,
     height: 600,
@@ -14,6 +20,7 @@ function createWindow() {
     alwaysOnTop: true,
     frame: true,
     skipTaskbar: false,
+    icon: iconPath,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
