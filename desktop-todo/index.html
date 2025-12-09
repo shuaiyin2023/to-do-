@@ -76,6 +76,36 @@
             transform: scale(0.95);
         }
 
+        /* 层级按钮特殊样式 */
+        #window-level-btn {
+            font-size: 13px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        #window-level-btn.active-indicator::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
         .window-level-dropdown {
             position: relative;
             display: inline-block;
@@ -104,42 +134,101 @@
         .menu-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border-radius: 8px;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
-            font-size: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            font-size: 13px;
             font-weight: 500;
             color: #1d1d1f;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
 
         .menu-item:last-child {
             margin-bottom: 0;
         }
 
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .menu-item:hover::before {
+            left: 100%;
+        }
+
         .menu-item:hover {
-            background: rgba(0, 122, 255, 0.1);
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(88, 86, 214, 0.06) 100%);
             color: #007AFF;
+            border-color: rgba(0, 122, 255, 0.2);
+            transform: translateX(2px);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.1);
         }
 
         .menu-item.active {
-            background: rgba(0, 122, 255, 0.12);
-            color: #007AFF;
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            color: white;
             font-weight: 600;
+            border-color: rgba(0, 122, 255, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25);
+            transform: translateX(4px);
+        }
+
+        .menu-item.active::after {
+            content: '✓';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            font-weight: 700;
+            opacity: 0;
+            animation: checkmarkFadeIn 0.3s forwards;
+        }
+
+        @keyframes checkmarkFadeIn {
+            to {
+                opacity: 1;
+            }
         }
 
         .menu-icon {
-            font-size: 14px;
-            width: 16px;
-            text-align: center;
+            font-size: 16px;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            background: rgba(0, 122, 255, 0.1);
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .menu-item:hover .menu-icon {
+            background: rgba(0, 122, 255, 0.15);
+            transform: scale(1.1);
+        }
+
+        .menu-item.active .menu-icon {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
         }
 
         .menu-text {
             flex: 1;
-            font-size: 12px;
+            font-size: 13px;
             letter-spacing: -0.01em;
+            font-weight: 500;
         }
 
         @keyframes fadeInDown {
@@ -1240,29 +1329,36 @@
                 }
             });
 
-            // 更新按钮图标
+            // 更新按钮图标和添加选中状态指示器
             const button = document.getElementById('window-level-btn');
             if (button) {
+                // 先移除所有的选中状态类
+                button.classList.remove('active-indicator');
+
                 switch (level) {
                     case 'alwaysOnTop':
                         button.textContent = '🔝';
                         button.title = '始终浮于最上层';
                         button.style.color = '#007AFF';
+                        button.classList.add('active-indicator');
                         break;
                     case 'desktop':
                         button.textContent = '🖥️';
                         button.title = '只浮于桌面';
                         button.style.color = '#34C759';
+                        button.classList.add('active-indicator');
                         break;
                     case 'normal':
                         button.textContent = '📋';
                         button.title = '普通窗口';
                         button.style.color = '#8e8e93';
+                        button.classList.add('active-indicator');
                         break;
                     default:
                         button.textContent = '⬆️';
                         button.title = '窗口层级';
                         button.style.color = '#007AFF';
+                        button.classList.add('active-indicator');
                         break;
                 }
             }
