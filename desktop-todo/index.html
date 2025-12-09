@@ -520,6 +520,51 @@
             text-overflow: ellipsis;
             letter-spacing: -0.01em;
             flex-shrink: 0;
+            position: relative;
+            cursor: help;
+        }
+
+        /* Tooltip样式 */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 400;
+            white-space: nowrap;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 300px;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid rgba(0, 0, 0, 0.9);
         }
 
         .task-due-date.overdue {
@@ -1078,6 +1123,17 @@
 
                 let cssClass = 'normal';
                 let timeText = '';
+                let fullText = ''; // 用于tooltip的完整文本
+
+                // 生成完整的截止时间信息
+                const dueDateTime = due.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    weekday: 'long'
+                });
 
                 if (diff < 0) {
                     // 逾期情况
@@ -1096,6 +1152,7 @@
                     } else {
                         timeText = '截止：已逾期';
                     }
+                    fullText = `任务已逾期\n截止时间：${dueDateTime}\n${timeText}`;
                 } else {
                     // 即将到期的情况
                     if (days < 1) {
@@ -1131,9 +1188,10 @@
                         });
                         timeText = `截止：${formattedDate}`;
                     }
+                    fullText = `截止时间：${dueDateTime}\n${timeText}`;
                 }
 
-                return `<div class="task-due-date ${cssClass}">${timeText}</div>`;
+                return `<div class="task-due-date ${cssClass}" data-tooltip="${fullText.replace(/"/g, '&quot;')}">${timeText}</div>`;
             }
 
             updateStats() {
@@ -1397,10 +1455,143 @@
             }
         }
 
+        // Tooltip管理器
+        class TooltipManager {
+            constructor() {
+                this.tooltip = null;
+                this.showTimeout = null;
+                this.hideTimeout = null;
+                this.init();
+            }
+
+            init() {
+                // 为document添加事件委托，处理所有带有data-tooltip的元素
+                document.addEventListener('mouseenter', this.handleMouseEnter.bind(this), true);
+                document.addEventListener('mouseleave', this.handleMouseLeave.bind(this), true);
+                document.addEventListener('mousemove', this.handleMouseMove.bind(this), true);
+            }
+
+            handleMouseEnter(e) {
+                const target = e.target.closest('[data-tooltip]');
+                if (target && target.dataset.tooltip) {
+                    this.showTooltip(target, target.dataset.tooltip);
+                }
+            }
+
+            handleMouseLeave(e) {
+                const target = e.target.closest('[data-tooltip]');
+                if (target) {
+                    this.hideTooltip();
+                }
+            }
+
+            handleMouseMove(e) {
+                if (this.tooltip && this.tooltip.classList.contains('show')) {
+                    this.positionTooltip(e.clientX, e.clientY);
+                }
+            }
+
+            showTooltip(element, text) {
+                // 清除之前的timeout
+                if (this.showTimeout) {
+                    clearTimeout(this.showTimeout);
+                }
+                if (this.hideTimeout) {
+                    clearTimeout(this.hideTimeout);
+                }
+
+                // 延迟显示tooltip，避免快速划过时闪烁
+                this.showTimeout = setTimeout(() => {
+                    this.createTooltip(text);
+                    this.positionTooltipFromElement(element);
+                }, 300);
+            }
+
+            hideTooltip() {
+                // 清除显示timeout
+                if (this.showTimeout) {
+                    clearTimeout(this.showTimeout);
+                    this.showTimeout = null;
+                }
+
+                if (this.tooltip) {
+                    this.tooltip.classList.remove('show');
+                    // 延迟隐藏，给用户时间移动到tooltip上（如果需要的话）
+                    this.hideTimeout = setTimeout(() => {
+                        if (this.tooltip && this.tooltip.parentNode) {
+                            this.tooltip.parentNode.removeChild(this.tooltip);
+                            this.tooltip = null;
+                        }
+                    }, 100);
+                }
+            }
+
+            createTooltip(text) {
+                // 如果已存在tooltip，先移除
+                if (this.tooltip && this.tooltip.parentNode) {
+                    this.tooltip.parentNode.removeChild(this.tooltip);
+                }
+
+                // 创建新的tooltip元素
+                this.tooltip = document.createElement('div');
+                this.tooltip.className = 'tooltip';
+                this.tooltip.textContent = text;
+                document.body.appendChild(this.tooltip);
+            }
+
+            positionTooltipFromElement(element) {
+                if (!this.tooltip) return;
+
+                const rect = element.getBoundingClientRect();
+                const tooltipRect = this.tooltip.getBoundingClientRect();
+
+                // 默认显示在元素上方
+                let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                let top = rect.top - tooltipRect.height - 8;
+
+                // 确保tooltip不会超出视口边界
+                if (left < 8) left = 8;
+                if (left + tooltipRect.width > window.innerWidth - 8) {
+                    left = window.innerWidth - tooltipRect.width - 8;
+                }
+                if (top < 8) {
+                    // 如果上方空间不够，显示在下方
+                    top = rect.bottom + 8;
+                }
+
+                this.tooltip.style.left = left + 'px';
+                this.tooltip.style.top = top + 'px';
+                this.tooltip.classList.add('show');
+            }
+
+            positionTooltip(x, y) {
+                if (!this.tooltip) return;
+
+                const tooltipRect = this.tooltip.getBoundingClientRect();
+                let left = x - (tooltipRect.width / 2);
+                let top = y - tooltipRect.height - 12;
+
+                // 确保tooltip不会超出视口边界
+                if (left < 8) left = 8;
+                if (left + tooltipRect.width > window.innerWidth - 8) {
+                    left = window.innerWidth - tooltipRect.width - 8;
+                }
+                if (top < 8) {
+                    top = y + 12;
+                }
+
+                this.tooltip.style.left = left + 'px';
+                this.tooltip.style.top = top + 'px';
+            }
+        }
+
         // 页面加载完成后测试
         window.addEventListener('load', () => {
             console.log('页面完全加载完成');
             showStatus('页面加载完成');
+
+            // 初始化tooltip管理器
+            const tooltipManager = new TooltipManager();
 
             // 延迟初始化窗口层级菜单状态
             setTimeout(() => {
