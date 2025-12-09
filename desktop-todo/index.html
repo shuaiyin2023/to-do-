@@ -293,6 +293,38 @@
             letter-spacing: -0.02em;
         }
 
+        /* 逾期统计特殊样式 */
+        .stats #overdue-count {
+            color: #FF3B30;
+            position: relative;
+        }
+
+        .stats #overdue-count::before {
+            content: '⚠️';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* 如果逾期数量大于0，添加动画效果 */
+        .stats #overdue-count.has-overdue {
+            animation: pulse-warning 2s infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+
         .add-btn {
             width: 100%;
             padding: 14px 20px;
@@ -515,7 +547,7 @@
             display: inline-block;
             font-weight: 500;
             white-space: nowrap;
-            max-width: 50%;
+            max-width: 180px;
             overflow: hidden;
             text-overflow: ellipsis;
             letter-spacing: -0.01em;
@@ -594,13 +626,19 @@
             cursor: pointer;
             font-size: 11px;
             font-weight: 500;
-            display: none;
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
             transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
             letter-spacing: -0.01em;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .task-item:hover .delete-btn {
-            display: block;
+            opacity: 1;
+            width: auto;
+            min-width: 46px; /* 保证按钮有足够宽度 */
         }
 
         .delete-btn:hover {
@@ -668,6 +706,76 @@
             animation: slideIn 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
+        /* 批量选择模式样式 */
+        .task-batch-checkbox {
+            margin-top: 3px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0, 122, 255, 0.3);
+            border-radius: 4px;
+            appearance: none;
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            margin-right: 0;
+        }
+
+        .batch-mode .task-batch-checkbox {
+            opacity: 1;
+            width: 18px;
+            margin-right: 8px;
+        }
+
+        .task-batch-checkbox:checked {
+            background: #007AFF;
+            border-color: #007AFF;
+        }
+
+        .task-batch-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .task-batch-checkbox:hover {
+            border-color: #007AFF;
+            background: rgba(0, 122, 255, 0.05);
+        }
+
+        .task-item.selected {
+            background: rgba(0, 122, 255, 0.08);
+            border-color: rgba(0, 122, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
+        }
+
+        .task-item.selected:hover {
+            background: rgba(0, 122, 255, 0.12);
+            border-color: rgba(0, 122, 255, 0.3);
+        }
+
+        .batch-mode-toggle.active {
+            background: rgba(0, 122, 255, 0.15);
+            color: #007AFF;
+            font-weight: 600;
+        }
+
+        .batch-actions {
+            background: rgba(0, 122, 255, 0.05);
+            border: 1px solid rgba(0, 122, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
         /* 状态指示器 */
         .status-indicator {
             position: fixed;
@@ -709,6 +817,10 @@
                 <div>待办</div>
             </span>
             <span>
+                <strong id="overdue-count">0</strong>
+                <div>逾期</div>
+            </span>
+            <span>
                 <strong id="completed-count">0</strong>
                 <div>已完成</div>
             </span>
@@ -717,10 +829,37 @@
         <div class="filter-buttons">
             <button class="filter-btn active" onclick="filterTasks('all')">全部</button>
             <button class="filter-btn" onclick="filterTasks('pending')">待办</button>
+            <button class="filter-btn" onclick="filterTasks('overdue')">逾期</button>
             <button class="filter-btn" onclick="filterTasks('completed')">已完成</button>
         </div>
 
         <button class="add-btn" onclick="showAddTask()">✨ 添加任务</button>
+
+        <!-- 批量操作区域 -->
+        <div id="batch-actions" style="display: none; margin-bottom: 16px;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span style="font-size: 13px; font-weight: 500; color: #1d1d1f;">
+                    已选择 <strong id="selected-count">0</strong> 个任务
+                </span>
+                <div style="flex: 1;"></div>
+                <button onclick="selectAllTasks()" style="padding: 6px 12px; background: rgba(0, 122, 255, 0.1); color: #007AFF; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);">
+                    全选
+                </button>
+                <button onclick="deselectAllTasks()" style="padding: 6px 12px; background: rgba(142, 142, 147, 0.1); color: #8e8e93; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);">
+                    取消
+                </button>
+                <button onclick="batchDeleteTasks()" style="padding: 6px 12px; background: rgba(255, 59, 48, 0.1); color: #FF3B30; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);">
+                    🗑️ 删除选中
+                </button>
+            </div>
+        </div>
+
+        <!-- 批量删除切换按钮 -->
+        <div style="margin-bottom: 16px; text-align: right;">
+            <button id="batch-mode-toggle" onclick="toggleBatchMode()" style="padding: 8px 16px; background: rgba(52, 199, 89, 0.1); color: #34C759; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1); display: flex; align-items: center; gap: 6px; margin-left: auto;">
+                <span>☑️</span> 批量选择
+            </button>
+        </div>
 
         <div id="add-task-section" class="input-section">
             <input type="text" id="task-input" placeholder="输入任务内容，按回车确认..." />
@@ -778,6 +917,8 @@
             constructor() {
                 this.tasks = this.loadTasks();
                 this.currentFilter = 'all';
+                this.batchMode = false;
+                this.selectedTasks = [];
                 this.init();
                 this.cleanupOldTasks(); // 启动时清理旧数据
                 showStatus('应用启动成功');
@@ -809,9 +950,9 @@
                     this.cleanupOldTasks();
                 }, 30 * 60 * 1000);
 
-                // 定期刷新界面（每分钟更新一次截止时间显示）
+                // 定期更新截止时间显示（每分钟检查一次，只在必要时刷新）
                 setInterval(() => {
-                    this.renderTasks();
+                    this.updateTimeDisplay();
                 }, 60 * 1000);
 
                 showStatus('初始化完成');
@@ -1021,11 +1162,32 @@
                 showStatus('切换到: ' + filter);
             }
 
+            // 判断任务是否逾期
+            isTaskOverdue(task) {
+                // 只有待办任务才可能逾期
+                if (task.status !== 'pending') {
+                    return false;
+                }
+
+                // 必须设置截止时间才可能逾期
+                if (!task.due_date) {
+                    return false;
+                }
+
+                const dueDate = new Date(task.due_date);
+                const now = new Date();
+
+                // 如果截止时间早于当前时间，则逾期
+                return dueDate < now;
+            }
+
             getFilteredTasks() {
                 if (this.currentFilter === 'completed') {
                     return this.tasks.filter(task => task.status === 'completed');
                 } else if (this.currentFilter === 'pending') {
                     return this.tasks.filter(task => task.status === 'pending');
+                } else if (this.currentFilter === 'overdue') {
+                    return this.tasks.filter(task => this.isTaskOverdue(task));
                 }
                 // 默认情况下，不显示已删除的任务
                 return this.tasks.filter(task => task.status !== 'deleted');
@@ -1040,6 +1202,8 @@
                         ? '<p>🎉 太棒了！没有待完成任务</p>'
                         : this.currentFilter === 'pending'
                         ? '<p>😊 没有待办任务</p>'
+                        : this.currentFilter === 'overdue'
+                        ? '<p>✨ 很好！没有逾期任务</p><p>所有任务都在按时进行中</p>'
                         : '<p>🎯 开始您的第一天</p><p>点击"添加任务"创建第一个待办事项</p>';
 
                     taskList.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
@@ -1047,7 +1211,13 @@
                 }
 
                 taskList.innerHTML = filteredTasks.map((task, index) => `
-                    <div class="task-item ${task.status}" onclick="todoManager.toggleTask('${task.id}')" style="animation-delay: ${index * 0.1}s">
+                    <div class="task-item ${task.status} ${this.selectedTasks.includes(task.id) ? 'selected' : ''}" data-task-id="${task.id}" onclick="todoManager.toggleTask('${task.id}')" style="animation-delay: ${index * 0.1}s">
+                        <input
+                            type="checkbox"
+                            class="task-batch-checkbox"
+                            ${this.selectedTasks.includes(task.id) ? 'checked' : ''}
+                            onclick="event.stopPropagation(); todoManager.toggleTaskSelection('${task.id}')"
+                        />
                         <input
                             type="checkbox"
                             class="task-checkbox"
@@ -1194,16 +1364,160 @@
                 return `<div class="task-due-date ${cssClass}" data-tooltip="${fullText.replace(/"/g, '&quot;')}">${timeText}</div>`;
             }
 
+            // 只更新时间显示，不重新渲染整个界面
+            updateTimeDisplay() {
+                const dueDateElements = document.querySelectorAll('.task-due-date');
+                let hasChanges = false;
+
+                dueDateElements.forEach(element => {
+                    const taskId = element.closest('.task-item')?.onclick?.toString().match(/'([^']+)'/)?.[1];
+                    if (taskId) {
+                        const task = this.tasks.find(t => t.id === taskId);
+                        if (task && task.due_date) {
+                            const newHtml = this.formatDueDate(task.due_date);
+                            if (element.outerHTML !== newHtml) {
+                                element.outerHTML = newHtml;
+                                hasChanges = true;
+                            }
+                        }
+                    }
+                });
+
+                // 如果时间显示有变化，更新统计（因为逾期状态可能改变）
+                if (hasChanges) {
+                    this.updateStats();
+                }
+            }
+
+            // 切换批量选择模式
+            toggleBatchMode() {
+                this.batchMode = !this.batchMode;
+                this.selectedTasks = [];
+
+                const container = document.querySelector('.container');
+                const batchToggle = document.getElementById('batch-mode-toggle');
+                const batchActions = document.getElementById('batch-actions');
+
+                if (this.batchMode) {
+                    container.classList.add('batch-mode');
+                    batchToggle.classList.add('active');
+                    batchToggle.innerHTML = '<span>✖️</span> 退出批量选择';
+                    batchActions.style.display = 'block';
+                    showStatus('批量选择模式已开启');
+                } else {
+                    container.classList.remove('batch-mode');
+                    batchToggle.classList.remove('active');
+                    batchToggle.innerHTML = '<span>☑️</span> 批量选择';
+                    batchActions.style.display = 'none';
+                    showStatus('批量选择模式已关闭');
+                }
+
+                this.renderTasks();
+                this.updateSelectedCount();
+            }
+
+            // 切换任务选择状态
+            toggleTaskSelection(taskId) {
+                const index = this.selectedTasks.indexOf(taskId);
+                if (index > -1) {
+                    this.selectedTasks.splice(index, 1);
+                } else {
+                    this.selectedTasks.push(taskId);
+                }
+
+                this.updateTaskSelection();
+                this.updateSelectedCount();
+            }
+
+            // 更新任务选中状态的UI
+            updateTaskSelection() {
+                const taskItems = document.querySelectorAll('.task-item');
+                taskItems.forEach(item => {
+                    const taskId = item.dataset.taskId;
+                    if (this.selectedTasks.includes(taskId)) {
+                        item.classList.add('selected');
+                        const checkbox = item.querySelector('.task-batch-checkbox');
+                        if (checkbox) checkbox.checked = true;
+                    } else {
+                        item.classList.remove('selected');
+                        const checkbox = item.querySelector('.task-batch-checkbox');
+                        if (checkbox) checkbox.checked = false;
+                    }
+                });
+            }
+
+            // 更新选中数量显示
+            updateSelectedCount() {
+                const countElement = document.getElementById('selected-count');
+                if (countElement) {
+                    countElement.textContent = this.selectedTasks.length;
+                }
+            }
+
+            // 全选当前筛选的任务
+            selectAllTasks() {
+                const filteredTasks = this.getFilteredTasks();
+                this.selectedTasks = filteredTasks.map(task => task.id);
+                this.updateTaskSelection();
+                this.updateSelectedCount();
+                showStatus(`已选择所有 ${this.selectedTasks.length} 个任务`);
+            }
+
+            // 取消所有选择
+            deselectAllTasks() {
+                this.selectedTasks = [];
+                this.updateTaskSelection();
+                this.updateSelectedCount();
+                showStatus('已取消所有选择');
+            }
+
+            // 批量删除选中的任务
+            batchDeleteTasks() {
+                if (this.selectedTasks.length === 0) {
+                    showStatus('请先选择要删除的任务');
+                    return;
+                }
+
+                const count = this.selectedTasks.length;
+                if (confirm(`确定要删除选中的 ${count} 个任务吗？\n\n删除后任务将移至回收站，24小时后自动清理。`)) {
+                    const now = new Date();
+                    this.selectedTasks.forEach(taskId => {
+                        const task = this.tasks.find(t => t.id === taskId);
+                        if (task) {
+                            task.status = 'deleted';
+                            task.deleted_at = now.toISOString();
+                        }
+                    });
+
+                    this.selectedTasks = [];
+                    this.saveTasks();
+                    this.renderTasks();
+                    this.updateStats();
+                    this.updateSelectedCount();
+                    showStatus(`🗑️ 已删除 ${count} 个任务`);
+                }
+            }
+
             updateStats() {
                 // 只统计活跃任务（不包括已删除的任务）
                 const activeTasks = this.tasks.filter(task => task.status !== 'deleted');
                 const total = activeTasks.length;
                 const completed = activeTasks.filter(task => task.status === 'completed').length;
                 const pending = activeTasks.filter(task => task.status === 'pending').length;
+                const overdue = activeTasks.filter(task => this.isTaskOverdue(task)).length;
 
                 document.getElementById('total-count').textContent = total;
                 document.getElementById('completed-count').textContent = completed;
                 document.getElementById('pending-count').textContent = pending;
+                document.getElementById('overdue-count').textContent = overdue;
+
+                // 为逾期统计添加特殊样式效果
+                const overdueElement = document.getElementById('overdue-count');
+                if (overdue > 0) {
+                    overdueElement.classList.add('has-overdue');
+                } else {
+                    overdueElement.classList.remove('has-overdue');
+                }
             }
         }
 
@@ -1313,6 +1627,35 @@
                     todoManager.updateStats();
                     showStatus('✨ 手动清理完成');
                 }
+            }
+        }
+
+        // 批量选择相关函数
+        function toggleBatchMode() {
+            console.log('toggleBatchMode被调用');
+            if (todoManager) {
+                todoManager.toggleBatchMode();
+            }
+        }
+
+        function selectAllTasks() {
+            console.log('selectAllTasks被调用');
+            if (todoManager) {
+                todoManager.selectAllTasks();
+            }
+        }
+
+        function deselectAllTasks() {
+            console.log('deselectAllTasks被调用');
+            if (todoManager) {
+                todoManager.deselectAllTasks();
+            }
+        }
+
+        function batchDeleteTasks() {
+            console.log('batchDeleteTasks被调用');
+            if (todoManager) {
+                todoManager.batchDeleteTasks();
             }
         }
 
